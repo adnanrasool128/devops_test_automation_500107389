@@ -233,7 +233,11 @@ Instead of simple arithmetic, imagine an API that fetches/stores data in a **Pos
 
 ```yaml
 name: API Tests
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
   test:
@@ -248,8 +252,10 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: apt install python3 pipenv -y
-        run: pipenv install fastapi uvicorn pytest requests
+        run: |
+          sudo apt update
+          sudo apt install python3-pip pipenv -y
+          pipenv install fastapi uvicorn pytest requests
 
       - name: Start FastAPI server
         run: pipenv run python3 apiserver.py &
@@ -257,7 +263,7 @@ jobs:
           PYTHONUNBUFFERED: 1
 
       - name: Wait for server to be ready
-        run: sleep 5  # Wait to ensure the server is up
+        run: sleep 5  # Ensures the server is up before running tests
 
       - name: Run tests
         run: pipenv run pytest automation_test_pytest.py
